@@ -1,0 +1,47 @@
+.area {
+  fill: lightsteelblue;
+}
+
+.line {
+    fill:none;
+    stroke: black;
+    stroke-width: 1.5px;
+}
+
+.legend {
+    width:60px;
+    border-bottom-width: thick;
+    border-bottom-style: solid;
+}
+
+#data-speed {
+    stroke: #269687;
+}
+
+#legend-speed {
+    background-color:#269687;
+}
+
+#data-altitude {
+    stroke: #7c4598;
+}
+
+#legend-altitude {
+    background-color:#7c4598;
+}
+
+#data-hr {
+    stroke: #9f2b32;
+}
+
+#legend-hr {
+    background-color:#9f2b32;
+}
+
+#data-distances {
+    stroke: #3873d7;
+}
+
+#legend-distances {
+    background-color:#3873d7;
+}

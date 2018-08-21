@@ -1,0 +1,8 @@
+node_modules
+config.js
+data/*
+cookie.txt
+past-sessions.csv
+past-sessions/
+ressources/track.sqlite
+not-working-past-sessions/

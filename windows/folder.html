@@ -1,0 +1,27 @@
+<head>
+    <title>Add a new track</title>
+    <!-- Bootstrap css -->
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../styles/flat-remix.min.css">
+</head>
+
+
+<body>
+        <div class="container">
+            <h1> Add Polar Flow folder</h1>
+            <div>
+                <button id="select-folder" class="btn">Open folder</button>
+                <span id="selected-folder"></span>
+            </div>
+            <div align="center">
+                <p>
+                    Due to requests on Google's server to retrieve locations, this process can take a while
+                </p>
+                <button id="save-folder" class="blue-button">Save</button>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            require('../renderer-process/folder')
+        </script>
+</body>

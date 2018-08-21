@@ -1,0 +1,28 @@
+<head>
+    <title>Add a new track</title>
+    <!-- Bootstrap css -->
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../styles/flat-remix.min.css">
+</head>
+
+
+<body>
+        <div class="container">
+            <h1> Add a Polar Flow track</h1>
+            <div>
+                <button id="select-gpx" class="btn">Open .gpx file</button>
+                <span id="selected-gpx"></span>
+            </div>
+            <div>
+                <button id="select-csv" class="btn">Open .csv file</button>
+                <span id="selected-csv"></span>
+            <div>
+            <div align="center">
+                <button id="save" class="blue-button">Save</button>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            require('../renderer-process/add')
+        </script>
+</body>
