@@ -7,7 +7,7 @@ exports.produceHtml = function(track){
     return `
     <tr>
         <td>
-            <input type='checkbox' class="admin-line" data-id=${track.id}/>
+            <input type='checkbox' class="admin-line" data-id=${track.id} />
         </td>
         <td>
             ${track.location}

@@ -272,3 +272,12 @@ exports.updateName = function(trackId,newName){
         { where: { id: trackId }}
     )
 }
+
+exports.deleteTracks = function(selected){
+    return Track.destroy({
+        where: {
+            id : {[Sequelize.Op.or]: selected}
+        }
+
+    })
+}

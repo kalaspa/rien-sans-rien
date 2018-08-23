@@ -206,6 +206,18 @@ ipcMain.on('update-name-in-db',(event,trackId,name)=>{
     }
 })
 
+ipcMain.on('delete-tracks',(event,selected)=>{
+    if (selected.length > 0){
+        db.deleteTracks(selected)
+            .then(()=>{
+                event.sender.send('success-delete')
+            })
+            .catch((err)=>{
+                event.sender.send('error-delete',err)
+            })
+    }
+})
+
 ipcMain.on('polar-oauth',(event)=>{
     polar.auth()
 })

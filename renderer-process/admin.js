@@ -1,6 +1,29 @@
 const {ipcRenderer} = require('electron')
 const {produceHtml, produceHeader} = require('./admin-design')
 
+const deleteBtn = document.getElementById('delete-button')
+
+deleteBtn.addEventListener('click',(event)=>{
+    var selected = []
+    Array.prototype.forEach.call(document.querySelectorAll(".admin-line"),(radio)=>{
+        if (radio.checked){
+            selected.push(radio.dataset.id)
+        }
+    })
+    ipcRenderer.send('delete-tracks',selected)
+})
+
+ipcRenderer.on('success-delete',(event)=>{
+    ipcRenderer.send('get-track-list')
+    alert("Successfully deleted in the database")
+})
+
+ipcRenderer.on('error-delete',(event,err)=>{
+    console.log(err)
+    alert("Error : " + err)
+})
+
+
 ipcRenderer.on('track-list-retrieved',(event,tracks)=>{
     line = produceHeader()
     for (track of tracks){
