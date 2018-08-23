@@ -1,11 +1,5 @@
 /* Demo */
 
-#demo-tracks {
-    height:750px;
-    overflow-y:scroll;
-    width:100%;
-}
-
 .demo:first-of-type {
   margin-top: 2rem;
 }

@@ -264,3 +264,11 @@ exports.getTrackPoints = function(trackId){
             })
     })
 }
+
+
+exports.updateName = function(trackId,newName){
+    return Track.update(
+        { location: newName }, /* set attributes' value */
+        { where: { id: trackId }}
+    )
+}

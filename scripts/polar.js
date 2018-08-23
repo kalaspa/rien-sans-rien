@@ -121,5 +121,7 @@ exports.createTransaction = function(){
         });
 }
 
+// exports.createTransaction()
+
 // base 64 credential
 // console.log(btoa(oAuthConfig.clientId+':'+oAuthConfig.clientSecret))

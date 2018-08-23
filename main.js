@@ -59,20 +59,20 @@ app.on('activate', function () {
 
 
 ipcMain.on('open-file-dialog', (event , extension) => {
-  const {dialog} = require('electron')
-  const options = {
-      title: 'Load the .' + extension + ' file',
-      filters: [
+    const {dialog} = require('electron')
+    const options = {
+        title: 'Load the .' + extension + ' file',
+        filters: [
           { name: 'All Files', extensions: [extension]}
-      ],
-      properties: ['openFile']
-  }
-  dialog.showOpenDialog(
-      options, (files) => {
-    if (files) {
-      event.sender.send('selected-directory', extension, files)
+        ],
+        properties: ['openFile']
     }
-  })
+    dialog.showOpenDialog(
+        options, (files) => {
+        if (files) {
+            event.sender.send('selected-directory', extension, files)
+        }
+    })
 })
 
 ipcMain.on('open-folder-dialog', (event , extension) => {
@@ -120,7 +120,7 @@ ipcMain.on('get-track-list',(event)=>{
             tracks.push(trackInstance.get({plain:true}))
         }
         tracks.sort((a,b)=>{return new Date(b.date).getTime() - new Date(a.date).getTime()})
-        event.sender.send('track-list-retrieved',tracks)
+        mainWindow.webContents.send('track-list-retrieved',tracks)
     })
 })
 
@@ -173,6 +173,37 @@ ipcMain.on('open-folder-window',(event)=>{
     win.on('close', () => { win = null })
     win.loadFile("windows/folder.html")
     win.show()
+})
+
+ipcMain.on('open-settings-window',(event,trackId)=>{
+    let win = new BrowserWindow({
+        autoHideMenuBar: true,
+        modal: true,
+        height: 250,
+        width: 700,
+        resizable: false,
+        parent: mainWindow,
+        show: false
+    })
+
+    win.on('close', () => { win = null })
+    win.loadFile("windows/settings.html")
+    win.once('ready-to-show', (event) => {
+        event.sender.send("settings-track-id", trackId)
+        win.show()
+    })
+})
+
+ipcMain.on('update-name-in-db',(event,trackId,name)=>{
+    if (trackId && name){
+        db.updateName(trackId,name)
+            .then(()=>{
+                event.sender.send('success-update')
+            })
+            .catch((err)=>{
+                event.sender.send('error-update',err)
+            })
+    }
 })
 
 ipcMain.on('polar-oauth',(event)=>{

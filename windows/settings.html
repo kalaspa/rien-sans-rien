@@ -1,0 +1,23 @@
+<head>
+    <title>Settings</title>
+    <!-- Bootstrap css -->
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../styles/flat-remix.min.css">
+</head>
+
+
+<body>
+        <div class="container">
+            <h1> Modify session</h1>
+            <div>
+                <input type="text" id="new-name" value="Enter new name"/>
+            </div>
+            <div align="center">
+                <button id="update-name" class="blue-button">Update name</button>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            require('../renderer-process/settings')
+        </script>
+</body>

@@ -29,7 +29,7 @@ addFolderButton.addEventListener('click', (event) => {
     ipcRenderer.send('open-folder-window')
 })
 
-ipcRenderer.send('get-track-list','tracks')
+ipcRenderer.send('get-track-list')
 
 Array.prototype.forEach.call(document.querySelectorAll(".switchs"),(sw)=>{
     sw.addEventListener('click',(event)=>{

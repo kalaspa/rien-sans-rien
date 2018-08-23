@@ -5,9 +5,3 @@
 #map {
     height:100%;
 }
-
-#check-pannel {
-    height:750px;
-    overflow-y:scroll;
-    width:100%;
-}
