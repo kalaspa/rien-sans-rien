@@ -5,6 +5,8 @@ const Promise = require('promise')
 const {googleApiKey} = require('./../config')
 const d3 = require('d3')
 const path = require('path')
+const {ipcMain} = require('electron')
+const moment = require('moment')
 
 const googleMaps = require('@google/maps').createClient({
     key : googleApiKey,
@@ -13,6 +15,15 @@ const googleMaps = require('@google/maps').createClient({
 });
 
 var ParseString = require('xml2js').parseString;
+let mainWindow
+let trackPointList = {}
+
+
+module.exports = function(win){
+    mainWindow = win
+
+    return {addPolarTrack: addPolarTrack}
+}
 
 const sequelize = new Sequelize('database', 'username', 'password', {
   dialect: 'sqlite',
@@ -140,6 +151,30 @@ var feedCSV = function(track, trackPoints, csvFile){
     })
 }
 
+var readGPX = function(track, trackPoints, gpxData){
+
+    return new Promise((resolve, reject)=>{
+        track.gpsOn = true
+
+        for (var i = 0; i < gpxData.trk[0].trkseg[0].trkpt.length && trackPoints[i]; i++){
+            trackPoints[i].lattitude = parseFloat(gpxData.trk[0].trkseg[0].trkpt[i]['$'].lat)
+            trackPoints[i].longitude = parseFloat(gpxData.trk[0].trkseg[0].trkpt[i]['$'].lon)
+        }
+
+        var lat = parseFloat(gpxData.trk[0].trkseg[0].trkpt[0]['$'].lat)
+        var lon = parseFloat(gpxData.trk[0].trkseg[0].trkpt[0]['$'].lon)
+
+        googleMaps.reverseGeocode({latlng: [lat, lon],result_type: "locality|country"}).asPromise()
+            .then((response)=>{
+                track.location = response.json.results[0]['formatted_address']
+                resolve()
+            })
+            .catch((err)=>{
+                reject(err.errors[0].message)
+            })
+    })
+}
+
 var feedGPX = function(track, trackPoints, gpxFile){
 
     return new Promise((resolve, reject)=>{
@@ -150,28 +185,39 @@ var feedGPX = function(track, trackPoints, gpxFile){
                 ParseString(data.toString(),(err,data)=>{
                     var gpxData = data.gpx
 
-                    track.gpsOn = true
-
-                    for (var i = 0; i < gpxData.trk[0].trkseg[0].trkpt.length && trackPoints[i]; i++){
-                        trackPoints[i].lattitude = parseFloat(gpxData.trk[0].trkseg[0].trkpt[i]['$'].lat)
-                        trackPoints[i].longitude = parseFloat(gpxData.trk[0].trkseg[0].trkpt[i]['$'].lon)
-                    }
-
-                    var lat = parseFloat(gpxData.trk[0].trkseg[0].trkpt[0]['$'].lat)
-                    var lon = parseFloat(gpxData.trk[0].trkseg[0].trkpt[0]['$'].lon)
-
-                    googleMaps.reverseGeocode({latlng: [lat, lon],result_type: "locality|country"}).asPromise()
-                        .then((response)=>{
-                            track.location = response.json.results[0]['formatted_address']
+                    readGPX(track, trackPoints, gpxData)
+                        .then(()=>{
                             resolve()
                         })
                         .catch((err)=>{
-                            reject(err.errors[0].message)
+                            reject(err)
                         })
-                    })
-                }
-            })
+                })
+            }
         })
+    })
+}
+
+var readSummary = function (track, summary){
+
+    track.sport = summary['detailed-sport-info']
+    track.date = new Date(summary['start-time'])
+    track.duration = Math.ceil(moment.duration(summary['duration']).asSeconds())
+    track.totalDistance = summary.distance / 1000
+    track.averageHeartRate =summary['heart-rate']['average']
+    track.gpsOn = false
+}
+
+var readSamples = function(track, trackPoints, samples){
+    var trackPoint
+    for (key in samples){console.log(key + " : "+ (samples[key].length / track.duration))}
+    for (var i = 0; i < track.duration; i++){
+        trackPoint = {time : i}
+        for (key in samples){
+            trackPoint[key] = samples[key][i]
+        }
+        trackPoints.push(trackPoint)
+    }
 }
 
 var commit = function(track, trackPoints){
@@ -199,7 +245,7 @@ var commit = function(track, trackPoints){
     })
 }
 
-exports.addTrack = function(gpxFile, csvFile){
+var addTrack = function(gpxFile, csvFile){
 
     return new Promise((resolve,reject)=>{
         var track = {}
@@ -225,8 +271,20 @@ exports.addTrack = function(gpxFile, csvFile){
     })
 }
 
-exports.addFolder = function(folder){
-    return new Promise((resolve, reject)=>{
+ipcMain.on('save-in-db',(event, gpxFile, csvFile)=>{
+    if (csvFile){
+        addTrack(gpxFile, csvFile)
+            .then(()=>{
+                event.sender.send('success-save')
+            })
+            .catch((err)=>{
+                event.sender.send('error-save',err)
+            })
+    }
+})
+
+ipcMain.on('save-in-db-folder',(event, folder)=>{
+    if (folder){
         var files = fs.readdirSync(folder);
         var promises = []
 
@@ -237,47 +295,108 @@ exports.addFolder = function(folder){
         }
         Promise.all(promises)
             .then(()=>{
+                event.sender.send('success-save')
+            })
+            .catch((err)=>{
+                event.sender.send('error-save',err)
+            })
+    }
+})
+
+ipcMain.on('get-track-list',(event)=>{
+    Track.findAll()
+        .then((trackInstances)=>{
+            tracks = []
+            for (trackInstance of trackInstances){
+                tracks.push(trackInstance.get({plain:true}))
+            }
+            tracks.sort((a,b)=>{return new Date(b.date).getTime() - new Date(a.date).getTime()})
+            mainWindow.webContents.send('track-list-retrieved',tracks)
+        })
+})
+
+ipcMain.on('get-track-points',(event,process,trackId)=>{
+    if (trackPointList.hasOwnProperty(trackId)){
+        event.sender.send('track-points-retrieved-'+process,trackPointList[trackId])
+    }
+    else {
+        TrackPoint.findAll({where: {trackId: trackId}})
+            .then((trackPointInstances)=>{
+
+                trackPoints = []
+                var duration
+                for (trackPointInstance of trackPointInstances){
+                    trackPoints.push(trackPointInstance.get({plain:true}))
+                }
+                trackPoints.sort((a,b)=>{return a.time - b.time})
+
+                event.sender.send('track-points-retrieved-'+process,trackPoints)
+                trackPointList[trackId] = trackPoints
+            })
+    }
+})
+
+ipcMain.on('update-name-in-db',(event,trackId,name)=>{
+    if (trackId && name){
+        Track.update(
+            { location: name }, /* set attributes' value */
+            { where: { id: trackId }}
+        )
+            .then(()=>{
+                event.sender.send('success-update')
+            })
+            .catch((err)=>{
+                event.sender.send('error-update',err)
+            })
+    }
+})
+
+
+ipcMain.on('delete-tracks',(event,selected)=>{
+    if (selected.length > 0){
+        Track.destroy({
+            where: {
+                id : {[Sequelize.Op.or]: selected}
+            }
+        })
+            .then(()=>{
+                event.sender.send('success-delete')
+            })
+            .catch((err)=>{
+                event.sender.send('error-delete',err)
+            })
+    }
+})
+
+var addPolarTrack = function(data, summary, samples){
+    var track = {}
+    var trackPoints = []
+
+    readSummary(track, summary)
+    readSamples(track, trackPoints, samples)
+
+    if (summary['has-route']){
+        return new Promise((resolve, reject)=>{
+            ParseString(data.toString(),(err,data)=>{
+                gpxData = data.gpx
+
+                readGPX(track, trackPoints, gpxData)
+                    .then(()=>{
+                        commit(track, trackPoints).then(()=>{
+                            resolve()
+                        })
+                    })
+                    .catch((err)=>{
+                        reject(err)
+                    })
+            })
+        })
+    }
+    else {
+        return new Promise((resolve, reject)=>{
+            commit(track, trackPoints).then(()=>{
                 resolve()
             })
-            .catch((err)=>{
-                reject(err)
-            })
-    })
-}
-
-exports.getTrackList = function(){
-    return new Promise(function(resolve,reject){
-        Track.findAll().then(tracks => {
-          resolve(tracks)
         })
-    })
-}
-
-exports.getTrackPoints = function(trackId){
-    return new Promise((resolve,reject)=>{
-        TrackPoint.findAll({where: {trackId: trackId}})
-            .then((trackPoints)=>{
-                resolve(trackPoints)
-            })
-            .catch((err)=>{
-                reject(err)
-            })
-    })
-}
-
-
-exports.updateName = function(trackId,newName){
-    return Track.update(
-        { location: newName }, /* set attributes' value */
-        { where: { id: trackId }}
-    )
-}
-
-exports.deleteTracks = function(selected){
-    return Track.destroy({
-        where: {
-            id : {[Sequelize.Op.or]: selected}
-        }
-
-    })
+    }
 }

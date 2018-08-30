@@ -1,36 +1,39 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow} = require('electron')
-const db = require("./scripts/database")
 const {ipcMain} = require('electron')
+
+// Load all of polar features
 const polar = require('./scripts/polar')
 
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
-let trackPointList = {}
 
 function createWindow () {
-  // Create the browser window.
-  mainWindow = new BrowserWindow({
-      autoHideMenuBar: true,
-      width:1920,
-      height:1080
-  })
+    // Create the browser window.
+    mainWindow = new BrowserWindow({
+        autoHideMenuBar: true,
+        width:1920,
+        height:1080
+    })
 
-  // and load the index.html of the app.
-  mainWindow.loadFile('index.html')
+    // and load the index.html of the app.
+    mainWindow.loadFile('index.html')
 
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+    // Load all of the database features, with a link towards the main window
+    require("./scripts/database")(mainWindow)
 
-  // Emitted when the window is closed.
-  mainWindow.on('closed', function () {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
-    mainWindow = null
-  })
+    // Open the DevTools.
+    // mainWindow.webContents.openDevTools()
+
+    // Emitted when the window is closed.
+    mainWindow.on('closed', function () {
+        // Dereference the window object, usually you would store windows
+        // in an array if your app supports multi windows, this is the time
+        // when you should delete the corresponding element.
+        mainWindow = null
+    })
 }
 
 // This method will be called when Electron has finished
@@ -89,62 +92,6 @@ ipcMain.on('open-folder-dialog', (event , extension) => {
   })
 })
 
-ipcMain.on('save-in-db',(event, gpxFile, csvFile)=>{
-    if (csvFile){
-        db.addTrack(gpxFile, csvFile)
-            .then(()=>{
-                event.sender.send('success-save')
-            })
-            .catch((err)=>{
-                event.sender.send('error-save',err)
-            })
-    }
-})
-
-ipcMain.on('save-in-db-folder',(event, folder)=>{
-    if (folder){
-        db.addFolder(folder)
-            .then(()=>{
-                event.sender.send('success-save')
-            })
-            .catch((err)=>{
-                event.sender.send('error-save',err)
-            })
-    }
-})
-
-ipcMain.on('get-track-list',(event)=>{
-    db.getTrackList().then((trackInstances)=>{
-        tracks = []
-        for (trackInstance of trackInstances){
-            tracks.push(trackInstance.get({plain:true}))
-        }
-        tracks.sort((a,b)=>{return new Date(b.date).getTime() - new Date(a.date).getTime()})
-        mainWindow.webContents.send('track-list-retrieved',tracks)
-    })
-})
-
-ipcMain.on('get-track-points',(event,process,trackId)=>{
-    if (trackPointList.hasOwnProperty(trackId)){
-        event.sender.send('track-points-retrieved-'+process,trackPointList[trackId])
-    }
-    else {
-        db.getTrackPoints(trackId)
-            .then((trackPointInstances)=>{
-
-                trackPoints = []
-                var duration
-                for (trackPointInstance of trackPointInstances){
-                    trackPoints.push(trackPointInstance.get({plain:true}))
-                }
-                trackPoints.sort((a,b)=>{return a.time - b.time})
-
-                event.sender.send('track-points-retrieved-'+process,trackPoints)
-                trackPointList[trackId] = trackPoints
-            })
-    }
-})
-
 ipcMain.on('open-add-window',(event)=>{
     let win = new BrowserWindow({
         autoHideMenuBar: true,
@@ -192,30 +139,6 @@ ipcMain.on('open-settings-window',(event,trackId)=>{
         event.sender.send("settings-track-id", trackId)
         win.show()
     })
-})
-
-ipcMain.on('update-name-in-db',(event,trackId,name)=>{
-    if (trackId && name){
-        db.updateName(trackId,name)
-            .then(()=>{
-                event.sender.send('success-update')
-            })
-            .catch((err)=>{
-                event.sender.send('error-update',err)
-            })
-    }
-})
-
-ipcMain.on('delete-tracks',(event,selected)=>{
-    if (selected.length > 0){
-        db.deleteTracks(selected)
-            .then(()=>{
-                event.sender.send('success-delete')
-            })
-            .catch((err)=>{
-                event.sender.send('error-delete',err)
-            })
-    }
 })
 
 ipcMain.on('polar-oauth',(event)=>{
