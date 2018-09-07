@@ -24,7 +24,7 @@ function handleSectionTrigger (event) {
 }
 
 function activateDefaultSection () {
-  document.getElementById('tracks-button').click()
+  document.getElementById('dashboard-button').click()
 }
 
 function hideAllSections() {

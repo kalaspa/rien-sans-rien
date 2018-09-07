@@ -1,7 +1,7 @@
 const GoogleMapsLoader = require('google-maps'); // only for common js environments
 const {ipcRenderer} = require('electron')
 const {produceHtml} = require('./maps-design')
-const {googleApiKey} = require('./../config')
+const {googleApiKey} = require('./../../config')
 
 let map
 var boundList = {}

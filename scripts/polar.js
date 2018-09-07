@@ -43,7 +43,7 @@ var send = function(url, method, headers, body=null){
             })
 }
 
-ipcMain.on("polar-auth",(event)=>{
+var auth = function(){
     const windowParams = {
         alwaysOnTop: true,
         autoHideMenuBar: true,
@@ -57,11 +57,10 @@ ipcMain.on("polar-auth",(event)=>{
     polarOAuth.getAccessToken({})
         .then(token => {
             stash.set('user-token',token)
-            event.sender.send('polar-oauth-reply', token);
         }, err => {
             console.log('Error while getting token', err);
         });
-})
+}
 
 var register = function(member_id){
     const headers = buildHeaders("USER")
@@ -161,34 +160,38 @@ var getSamples = function(exoURI){
 }
 
 
-getNotifications().then((body)=>{
-    var exercise = false
-    for (item of body['available-user-data']){
-        if (item['data-type'] == 'EXERCISE'){
-            exercise = true
-        }
-    }
-    if (exercise){
-        createTransaction().then((body)=>{
-            var transactionId = body["transaction-id"]
-            console.log(transactionId)
-            listExercises(transactionId).then((body)=>{
-                for (exoURI of body["exercises"]){
-                    console.log(exoURI)
-                    var promises = []
-
-                    promises.push(getGPX(exoURI))
-                    promises.push(getSummary(exoURI))
-                    promises.push(getSamples(exoURI))
-
-                    Promise.all(promises).then(values=>{
-                        db.addPolarTrack(values[0], values[1], values[2])
-                            .then(()=>{
-                                console.log('Done : ' + exoURI)
-                            })
-                    })
-                }
-            })
-        })
-    }
+ipcMain.on('polar-activate',()=>{
+    console.log("Test")
 })
+
+// getNotifications().then((body)=>{
+//     var exercise = false
+//     for (item of body['available-user-data']){
+//         if (item['data-type'] == 'EXERCISE'){
+//             exercise = true
+//         }
+//     }
+//     if (exercise){
+//         createTransaction().then((body)=>{
+//             var transactionId = body["transaction-id"]
+//             console.log(transactionId)
+//             listExercises(transactionId).then((body)=>{
+//                 for (exoURI of body["exercises"]){
+//                     console.log(exoURI)
+//                     var promises = []
+//
+//                     promises.push(getGPX(exoURI))
+//                     promises.push(getSummary(exoURI))
+//                     promises.push(getSamples(exoURI))
+//
+//                     Promise.all(promises).then(values=>{
+//                         db.addPolarTrack(values[0], values[1], values[2])
+//                             .then(()=>{
+//                                 console.log('Done : ' + exoURI)
+//                             })
+//                     })
+//                 }
+//             })
+//         })
+//     }
+// })

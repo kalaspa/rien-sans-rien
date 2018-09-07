@@ -7,3 +7,18 @@
 	overflow-y:scroll;
 	width:100%;
 }
+
+#polar-button {
+	background:url(./../icons/polar.png) no-repeat center center;
+	background-size: cover;
+	border:none;
+	width:100px;
+	height:100px;
+	color:transparent;
+}
+
+#polar-button:hover {
+	background:url(./../icons/polar.png) no-repeat center center;
+	background-size: cover;
+	filter: invert(100%);
+}

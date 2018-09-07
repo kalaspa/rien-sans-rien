@@ -1,4 +1,4 @@
-const {icons} = require('./icons')
+const {icons} = require('./../icons')
 
 exports.produceHtml = function(track){
 
