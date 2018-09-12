@@ -204,13 +204,19 @@ var readSummary = function (track, summary){
     track.date = new Date(summary['start-time'])
     track.duration = Math.ceil(moment.duration(summary['duration']).asSeconds())
     track.totalDistance = summary.distance / 1000
+    track.averageSpeed = (track.totalDistance / (track.duration / 3600)).toFixed(2)
     track.averageHeartRate =summary['heart-rate']['average']
     track.gpsOn = false
+    track.calories = summary['calories']
 }
 
 var readSamples = function(track, trackPoints, samples){
     var trackPoint
-    for (key in samples){console.log(key + " : "+ (samples[key].length / track.duration))}
+
+    if (samples.hasOwnProperty('speed')){
+        track.maxSpeed = samples.speed.reduce((a,b)=>{return Math.max(a,b)})
+    }
+
     for (var i = 0; i < track.duration; i++){
         trackPoint = {time : i}
         for (key in samples){

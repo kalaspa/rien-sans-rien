@@ -39,6 +39,10 @@
   outline: none;
 }
 
+.demo-toggle-button:hover {
+    transform:scale(1.03);
+}
+
 .demo-toggle-button:before,
 .demo-toggle-button:after {
   content: "";

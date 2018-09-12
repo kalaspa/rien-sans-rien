@@ -4,7 +4,7 @@
 
 .scrollable {
 	height:750px;
-	overflow-y:scroll;
+	overflow-y: scroll;
 	width:100%;
 }
 
@@ -12,13 +12,19 @@
 	background:url(./../icons/polar.png) no-repeat center center;
 	background-size: cover;
 	border:none;
-	width:100px;
-	height:100px;
+	width:90px;
+	height:90px;
 	color:transparent;
 }
 
 #polar-button:hover {
-	background:url(./../icons/polar.png) no-repeat center center;
-	background-size: cover;
+	transform:scale(1.03);
+}
+
+#polar-button:active {
 	filter: invert(100%);
+}
+
+.settings-btn:hover {
+	transform:scale(1.03);
 }

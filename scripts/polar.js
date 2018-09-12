@@ -165,15 +165,15 @@ ipcMain.on('polar-activate',()=>{
 })
 
 // getNotifications().then((body)=>{
-//     var exercise = false
+//     var exercise = true // false
 //     for (item of body['available-user-data']){
 //         if (item['data-type'] == 'EXERCISE'){
 //             exercise = true
 //         }
 //     }
 //     if (exercise){
-//         createTransaction().then((body)=>{
-//             var transactionId = body["transaction-id"]
+//         // createTransaction().then((body)=>{
+//             var transactionId = 168098036 // body["transaction-id"]
 //             console.log(transactionId)
 //             listExercises(transactionId).then((body)=>{
 //                 for (exoURI of body["exercises"]){
@@ -192,6 +192,6 @@ ipcMain.on('polar-activate',()=>{
 //                     })
 //                 }
 //             })
-//         })
+//         // })
 //     }
 // })

@@ -5,6 +5,8 @@ exports.produceHtml = function(track){
     var date = new Date(track.date)
     var duration = new Date()
     duration.setTime(track.duration*1000)
+    var pad2 = function(number){return (number < 10 ? '0' : '') + number}
+
 
     return `
     <tr>
@@ -16,7 +18,7 @@ exports.produceHtml = function(track){
         </td>
         <td><img height='16' src=${icons[track.sport]}/></td>
         <td>${track.location}</td>
-        <td>${date.getDate()}/${1+date.getMonth()}/${date.getFullYear()}</td>
+        <td>${pad2(date.getDate())}/${pad2(1+date.getMonth())}/${date.getFullYear()}</td>
     </tr>
     `
 
