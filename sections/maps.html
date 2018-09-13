@@ -1,28 +1,22 @@
 <template class="task-template">
-    <section class="section container-fluid" id="maps-section">
-        <div class="paper">
 
-            <div class="media">
-              <div class="media-body">
-                <h1>Maps</h1>
-              </div>
-              <button type='button' class="red-button" id="reload-button">Reload</button>
-            </div>
-
-            <div class="row">
-                <div class="col-3 scrollable" id="check-pannel">
-                    <table id="check-tracks">
-                    </table>
-                </div>
-
-                <div class="col-9" id="map-container">
-                    <div id="map"></div>
-                </div>
-            </div>
-
+    <section id="maps-section">
+        <div>
+            <h1 class="align-left">Maps</h1>
+            <button class="align-right red-button" type='button' id="reload-button">Reload</button>
         </div>
+
+        <div id="map-content">
+            <div class="scrollable" id="check-pannel">
+                <table id="check-tracks">
+                </table>
+            </div>
+
+            <div id="map"></div>
+        </div>
+
         <script type="text/javascript">
-          require('./renderer-process/maps/maps')
+            require('./renderer-process/maps/maps')
         </script>
     </section>
 </template>

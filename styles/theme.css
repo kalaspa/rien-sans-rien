@@ -1,0 +1,110 @@
+nav {
+    margin: 0;
+    padding: 0;
+    background-color: #333;
+}
+
+nav div {
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 26px;
+}
+
+nav div:hover {
+    background-color: #111;
+}
+
+table {
+    width: 100%;
+}
+
+th, td {
+    border-bottom: 1px solid #ddd;
+}
+
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+
+.btn {
+    border:none;
+    background-color: #333;
+    border-radius: 10px;
+    height:45px;
+    text-align:center;
+}
+
+.grid line {
+  stroke: lightgrey;
+  stroke-opacity: 0.7;
+  shape-rendering: crispEdges;
+}
+
+.btn:hover {
+	transform:scale(1.03);
+}
+
+
+#polar-button {
+	background:url(./../icons/polar.png) no-repeat center center;
+	background-size: cover;
+	border:none;
+	width:90px;
+	height:90px;
+	color:transparent;
+}
+
+#polar-button:active {
+	filter: invert(100%);
+}
+
+/* ------------------------- Analysis tab ---------------*/
+
+.area {
+  fill: lightsteelblue;
+}
+
+.line {
+    fill:none;
+    stroke: black;
+    stroke-width: 1.5px;
+}
+
+.legend {
+    width:60px;
+    border-bottom-width: thick;
+    border-bottom-style: solid;
+}
+
+#data-speed {
+    stroke: #269687;
+}
+
+#legend-speed {
+    background-color:#269687;
+}
+
+#data-altitude {
+    stroke: #7c4598;
+}
+
+#legend-altitude {
+    background-color:#7c4598;
+}
+
+#data-hr {
+    stroke: #9f2b32;
+}
+
+#legend-hr {
+    background-color:#9f2b32;
+}
+
+#data-distances {
+    stroke: #3873d7;
+}
+
+#legend-distances {
+    background-color:#3873d7;
+}

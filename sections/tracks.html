@@ -1,79 +1,74 @@
 <template class="task-template">
-    <section class="section container-fluid" id="tracks-section">
-        <div class="paper">
 
-            <div class="media">
-              <div class="media-body">
-                <h1>Analysis</h1>
-              </div>
-              <button type='button' class="red-button" id="reload-button">Reload</button>
-            </div>
-
-            <div class="row">
-                <div class="col-3 demo scrollable" id="demo-tracks">
-                </div>
-
-                <div class="col-6">
-                    <div id="graph"></div>
-                </div>
-
-                <div class="col-3">
-                    <table style='float:right'>
-                        <tr>
-                            <td>
-                                <label class="onoffswitch">
-                                    <input type="checkbox" id="altitude" class="switchs" checked>
-                                    <span><span data-on="yes" data-off="no"></span></span>
-                                </label>
-                            </td>
-                            <td><h4>Altitude</h4></td>
-                            <td id="legend-altitude" class='legend'></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label class="onoffswitch">
-                                    <input type="checkbox" id="hr" class="switchs">
-                                    <span><span data-on="yes" data-off="no"></span></span>
-                                </label>
-                            </td>
-                            <td><h4>Heart rate</h4></td>
-                            <td id="legend-hr" class='legend'></td>
-                        </tr>
-                        <tr>
-                        <tr>
-                            <td>
-                                <label class="onoffswitch">
-                                    <input type="checkbox" id="speed" class="switchs">
-                                    <span><span data-on="yes" data-off="no"></span></span>
-                                </label>
-                            </td>
-                            <td><h4>Speed</h4></td>
-                            <td id="legend-speed" class='legend'></td>
-                        </tr>
-                            <td>
-                                <label class="onoffswitch">
-                                    <input type="checkbox" id="distances" class="switchs">
-                                    <span><span data-on="yes" data-off="no"></span></span>
-                                </label>
-                            </td>
-                            <td><h4>Distance</h4></td>
-                            <td id="legend-distances" class='legend'></td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-
-            <div align="right">
-                <div class='btn-group'>
-                    <button type="button" class='rounded-button' id='add-track-button' center><img height='40' class='inverted' src='icons/file.svg'/></button>
-                    <button type="button" class='rounded-button' id='add-folder-button' center><img height='40' class='inverted' src='icons/folder.svg'/></button>
-                </div>
-            </div>
-
+    <section id="tracks-section">
+        <div>
+            <h1 class="align-left">Analysis</h1>
+            <button class="align-right red-button" type='button' id="reload-button">Reload</button>
         </div>
 
-        <script type="text/javascript">
-          require('./renderer-process/analysis/tracks')
-        </script>
+        <div id="tracks-content">
+            <div class="demo scrollable" id="demo-tracks">
+            </div>
+
+            <div>
+                <div id="graph"></div>
+            </div>
+
+            <div id="tracks-sidebar">
+                <table class='align-right'>
+                    <tr>
+                        <td>
+                            <label class="onoffswitch">
+                                <input type="checkbox" id="altitude" class="switchs" checked>
+                                <span><span data-on="yes" data-off="no"></span></span>
+                            </label>
+                        </td>
+                        <td><h4>Altitude</h4></td>
+                        <td id="legend-altitude" class='legend'></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label class="onoffswitch">
+                            <input type="checkbox" id="hr" class="switchs">
+                            <span><span data-on="yes" data-off="no"></span></span>
+                            </label>
+                        </td>
+                        <td><h4>Heart rate</h4></td>
+                        <td id="legend-hr" class='legend'></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label class="onoffswitch">
+                            <input type="checkbox" id="speed" class="switchs">
+                            <span><span data-on="yes" data-off="no"></span></span>
+                            </label>
+                        </td>
+                        <td><h4>Speed</h4></td>
+                        <td id="legend-speed" class='legend'></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label class="onoffswitch">
+                            <input type="checkbox" id="distances" class="switchs">
+                            <span><span data-on="yes" data-off="no"></span></span>
+                            </label>
+                        </td>
+                        <td><h4>Distance</h4></td>
+                        <td id="legend-distances" class='legend'></td>
+                    </tr>
+                </table>
+
+                <div align="right">
+                        <button type="button" class='rounded-button align-right' id='add-track-button' center><img height='40' class='inverted' src='icons/file.svg'/></button>
+                        <button type="button" class='rounded-button align-right' id='add-folder-button' center><img height='40' class='inverted' src='icons/folder.svg'/></button>
+                </div>
+            </div>
+        </div>
+
+
     </section>
+
+    <script type="text/javascript">
+      require('./renderer-process/analysis/tracks')
+    </script>
 </template>

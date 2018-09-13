@@ -1,20 +1,16 @@
 <template class="task-template">
-    <section class="section container-fluid" id="admin-section">
-        <div class="paper">
+    <section class="section" id="admin-section">
 
-            <div class="media">
-                <div class="media-body">
-                    <h1>Administration</h1>
-                </div>
-                <button type='button' class="red-button" id="delete-button"><img height="35px" src="icons/dustbin.svg" class="inverted"/></button>
+            <div>
+                <h1 class="align-left">Administration</h1>
+                <button class="align-right red-button" type='button' id="delete-button"><img height="35px" src="icons/dustbin.svg" class="inverted"/></button>
             </div>
 
-            <div class="scrollable">
-                <table id="admin-table" class="table">
+            <div class="scrollable" id="admin-content">
+                <table id="admin-table">
                 </table>
             </div>
 
-        </div>
         <script type="text/javascript">
           require('./renderer-process/admin/admin')
         </script>

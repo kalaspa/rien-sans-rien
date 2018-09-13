@@ -1,0 +1,85 @@
+/* ------------ General elements -----------------*/
+
+body {
+    display: grid;
+    grid-template-rows: 6% 1fr;
+    overflow-y: hidden;
+    height:100vh;
+}
+
+main {
+    grid-row: 2;
+}
+
+nav {
+    grid-row: 1;
+    list-style-type: none;
+    overflow: hidden;
+}
+
+nav div {
+    float: left;
+    display: block;
+    color: white;
+    text-align: center;
+}
+
+section {
+    position: absolute;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-rows: 8% 1fr;
+}
+
+td th {
+    padding: 15px;
+    text-align: left;
+}
+
+/* ------------ Classes -----------------*/
+
+.align-left {
+    float: left;
+    margin: auto;
+}
+
+.align-right {
+    float: right;
+    margin: auto;
+}
+
+/* ------------ Specific blocks -----------------*/
+
+
+#tracks-sidebar {
+    display: grid;
+    grid-template-rows: 90% 1fr;
+}
+
+#tracks-content {
+    display: grid;
+    grid-template-columns: 2fr 6fr 2fr;
+    max-height:85vh;
+}
+
+#map-content {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    grid-template-rows: 1fr;
+    max-height:85vh;
+}
+
+#admin-content {
+    max-height:85vh;
+}
+
+#graph {
+    text-align: center;;
+}
+
+#graph svg {
+    display: inline-block;
+}

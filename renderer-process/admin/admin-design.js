@@ -23,7 +23,7 @@ exports.produceHtml = function(track){
             ${pad2(duration.getUTCHours())}:${pad2(duration.getMinutes())}:${pad2(duration.getSeconds())}
         </td>
         <td>
-            <button type="button" class="settings-btn" data-id=${track.id}><img height='35px' src="icons/options.svg"/></button>
+            <button type="button" class="btn settings-btn" data-id=${track.id}><img class="inverted" height='35px' src="icons/options.svg"/></button>
         </td>
     </tr>
     `
