@@ -7,6 +7,7 @@ const {ipcMain} = require("electron")
 const path = require('path')
 const db = require('./database')()
 const Promise = require('promise')
+const parse = require('./parser')
 
 var sampleCodes = {
     0 : 'hr',
@@ -15,6 +16,12 @@ var sampleCodes = {
     3 : 'altitude',
     8 : 'pace',
     10 : 'distances'
+}
+
+var polar_urls = {
+    user: 'https://www.polaraccesslink.com/v3/users',
+    notifications: "https://www.polaraccesslink.com/v3/notifications",
+    transaction: (user_id) => {return ('https://www.polaraccesslink.com/v3/users/'+user_id+'/exercise-transactions')},
 }
 
 var buildHeaders = function(requester){
@@ -66,49 +73,10 @@ var register = function(member_id){
     const headers = buildHeaders("USER")
     const body = '<?xml version="1.0" encoding="utf-8" ?><register><member-id>'+member_id+'</member-id> </register>'
 
-    send('https://www.polaraccesslink.com/v3/users', 'POST', headers, body)
+    send(polar_urls.user, 'POST', headers, body)
         .then(function(body) {
             console.log(body);
         });
-}
-
-
-var getUser = function(){
-    const user = stash.get('user-token')
-    const headers = buildHeaders("USER")
-
-    send('https://www.polaraccesslink.com/v3/users/'+user.x_user_id, 'GET', headers)
-        .then(function(body) {
-            console.log(body);
-        });
-}
-
-var getNotifications = function(){
-
-    const headers = buildHeaders("CLIENT")
-
-    return send('https://www.polaraccesslink.com/v3/notifications', 'GET', headers)
-}
-
-var createTransaction = function(){
-    const user = stash.get('user-token')
-    const headers = buildHeaders("USER")
-
-    return send('https://www.polaraccesslink.com/v3/users/'+user.x_user_id+'/exercise-transactions', 'POST', headers)
-}
-
-var listExercises = function(transactionId){
-    const user = stash.get('user-token')
-    const headers = buildHeaders("USER")
-
-    return send('https://www.polaraccesslink.com/v3/users/'+user.x_user_id+'/exercise-transactions/'+transactionId, 'GET', headers)
-}
-
-var commit = function(transactionId){
-    const user = stash.get('user-token')
-    const headers = buildHeaders("USER")
-
-    return send('https://www.polaraccesslink.com/v3/users/'+user.x_user_id+'/exercise-transactions/'+transactionId, 'PUT', headers)
 }
 
 var getGPX = function(exoURI){
@@ -124,14 +92,6 @@ var getGPX = function(exoURI){
             return res.text()
         })
 }
-
-var getSummary = function(exoURI){
-    const user = stash.get('user-token')
-    const headers = buildHeaders('USER')
-
-    return send(exoURI, 'GET', headers)
-}
-
 
 var getSamples = function(exoURI){
     const user = stash.get('user-token')
@@ -159,39 +119,94 @@ var getSamples = function(exoURI){
     })
 }
 
+var Transaction = {
+    init : function(){
+        const user = stash.get('user-token')
+        const headers_client = buildHeaders("CLIENT")
+        const headers_user = buildHeaders("USER")
+
+        return new Promise((resolve,reject)=>{
+            send(polar_urls.notifications, 'GET', headers_client).then((body)=>{
+                var exercise = true
+                for (item of body['available-user-data']){
+                    if (item['data-type'] == 'EXERCISE'){exercise = true}
+                }
+                if (exercise){
+                    send(polar_urls.transaction(user.x_user_id), 'POST', headers_user).then((body)=>{
+                        this.transactionId = body["transaction-id"]
+                        console.log(this.transactionId)
+                        resolve()
+                    })
+                }
+                else {
+                    reject()
+                }
+            }).catch((error)=>{
+                reject(error)
+            })
+        })
+    },
+
+    commit: function(){
+        const user = stash.get('user-token')
+        const headers = buildHeaders("USER")
+
+        return send(polar_urls.transaction(user.x_user_id)+this.transactionId, 'PUT', headers)
+    },
+
+    downloadExercises: function(){
+        const user = stash.get('user-token')
+        const headers = buildHeaders('USER')
+
+        return new Promise((resolve, reject)=>{
+            send(polar_urls.transaction(user.x_user_id)+transactionId, 'GET', headers).then((body)=>{
+                for (url of body["exercises"]){
+                    var promises = []
+
+                    // GPX
+                    promises.push(getGPX(url))
+                    // Summary
+                    promises.push(send(exoURI, 'GET', headers))
+                    // Samples
+                    promises.push(getSamples(url))
+
+                    Promise.all(promises).then(values=>{
+                        resolve(values)
+                    })
+                    .catch((error)=>{
+                        reject(error)
+                    })
+                }
+            })
+        })
+    },
+}
+
 
 ipcMain.on('polar-activate',()=>{
-    console.log("Test")
-})
+    console.log(0)
 
-// getNotifications().then((body)=>{
-//     var exercise = true // false
-//     for (item of body['available-user-data']){
-//         if (item['data-type'] == 'EXERCISE'){
-//             exercise = true
-//         }
-//     }
-//     if (exercise){
-//         // createTransaction().then((body)=>{
-//             var transactionId = 168098036 // body["transaction-id"]
-//             console.log(transactionId)
-//             listExercises(transactionId).then((body)=>{
-//                 for (exoURI of body["exercises"]){
-//                     console.log(exoURI)
-//                     var promises = []
-//
-//                     promises.push(getGPX(exoURI))
-//                     promises.push(getSummary(exoURI))
-//                     promises.push(getSamples(exoURI))
-//
-//                     Promise.all(promises).then(values=>{
-//                         db.addPolarTrack(values[0], values[1], values[2])
-//                             .then(()=>{
-//                                 console.log('Done : ' + exoURI)
-//                             })
-//                     })
-//                 }
-//             })
-//         // })
-//     }
-// })
+    var trans = Object.create(Transaction)
+    console.log(1)
+
+    trans.init().then(()=>{
+        console.log(2)
+
+        trans.downloadExercises().then((values)=>{
+            console.log(3)
+
+            parse.polar(values).then((track,trackPoints)=>{
+                console.log(4)
+
+                db.commit(track,trackPoints).then(()=>{
+                    console.log(5)
+
+                    // trans.commit().then(()=>{
+                    //
+                    //     console.log("Done")
+                    // })
+                })
+            })
+        })
+    })
+})

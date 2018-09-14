@@ -8,11 +8,12 @@ const saveBtn = document.getElementById("save-folder")
 const selectFolderBtn = document.getElementById('select-folder')
 
 selectFolderBtn.addEventListener('click', (event) => {
-  ipcRenderer.send('open-folder-dialog')
+    console.log("Here")
+    ipcRenderer.send('open-folder-dialog')
 })
 
 ipcRenderer.on('selected-folder', (event, path) => {
-  document.getElementById('selected-folder').innerHTML = `${path}`
+    document.getElementById('selected-folder').innerHTML = `${path}`
 })
 
 saveBtn.addEventListener('click',(event) => {
