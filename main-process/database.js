@@ -12,6 +12,8 @@ let trackPointList = {}
 
 module.exports = function(win){
     mainWindow = win
+
+    return {commit: commit}
 }
 
 const sequelize = new Sequelize('database', 'username', 'password', {
@@ -65,10 +67,6 @@ const TrackPoint = sequelize.define('trackPoint', {
 
 TrackPoint.belongsTo(Track)
 Track.hasMany(TrackPoint)
-
-var parseNullString = function(inputString){
-    return "null".toUpperCase() == inputString.toUpperCase() ? null : inputString
-}
 
 sequelize.authenticate()
     .then(() => {
@@ -156,7 +154,7 @@ ipcMain.on('save-in-db-folder',(event, folder)=>{
 
         for (file of files){
             if (".csv" == path.parse(file).ext){
-                promises.push(exports.addTrack(path.join(folder,path.parse(file).name+'.gpx'),path.join(folder,file)))
+                promises.push(addTrack(path.join(folder,path.parse(file).name+'.gpx'),path.join(folder,file)))
             }
         }
         Promise.all(promises)

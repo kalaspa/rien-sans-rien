@@ -1,6 +1,5 @@
 const {ipcRenderer} = require('electron')
 const Promise = require('promise')
-const {BrowserWindow} = require('electron').remote
 const {produceHtml} = require('./tracks-design')
 const td = require('./tracks-drawing')
 

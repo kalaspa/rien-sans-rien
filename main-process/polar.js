@@ -4,8 +4,6 @@ const stash = require('stash')('data')
 const Buffer = require('buffer').Buffer
 const electronOauth2 = require('electron-oauth2');
 const {ipcMain} = require("electron")
-const path = require('path')
-const db = require('./database')()
 const Promise = require('promise')
 const parse = require('./parser')
 
@@ -18,10 +16,16 @@ var sampleCodes = {
     10 : 'distances'
 }
 
+let mainWindow
+module.exports = function(win){
+    mainWindow = win
+}
+
 var polar_urls = {
     user: 'https://www.polaraccesslink.com/v3/users',
     notifications: "https://www.polaraccesslink.com/v3/notifications",
     transaction: (user_id) => {return ('https://www.polaraccesslink.com/v3/users/'+user_id+'/exercise-transactions')},
+    transactionId: (user_id, trans_id) =>{return ('https://www.polaraccesslink.com/v3/users/'+user_id+'/exercise-transactions/'+trans_id)}
 }
 
 var buildHeaders = function(requester){
@@ -151,62 +155,74 @@ var Transaction = {
         const user = stash.get('user-token')
         const headers = buildHeaders("USER")
 
-        return send(polar_urls.transaction(user.x_user_id)+this.transactionId, 'PUT', headers)
+        return send(polar_urls.transactionId(user.x_user_id,this.transactionId), 'PUT', headers)
     },
 
-    downloadExercises: function(){
+    listExercises: function(){
         const user = stash.get('user-token')
         const headers = buildHeaders('USER')
 
         return new Promise((resolve, reject)=>{
-            send(polar_urls.transaction(user.x_user_id)+transactionId, 'GET', headers).then((body)=>{
-                for (url of body["exercises"]){
-                    var promises = []
-
-                    // GPX
-                    promises.push(getGPX(url))
-                    // Summary
-                    promises.push(send(exoURI, 'GET', headers))
-                    // Samples
-                    promises.push(getSamples(url))
-
-                    Promise.all(promises).then(values=>{
-                        resolve(values)
-                    })
-                    .catch((error)=>{
-                        reject(error)
-                    })
-                }
+            send(polar_urls.transactionId(user.x_user_id,this.transactionId), 'GET', headers).then((body)=>{
+                resolve(body["exercises"])
+            }).catch(err=>{
+                reject(err)
             })
         })
     },
+
+    downloadExercise: function(url){
+        const headers = buildHeaders('USER')
+
+        return new Promise((resolve,reject)=>{
+            var promises = []
+
+            // GPX
+            promises.push(getGPX(url))
+            // Summary
+            promises.push(send(url, 'GET', headers))
+            // Samples
+            promises.push(getSamples(url))
+
+            promises.push(fetch(url+'/fit',
+                {
+                    'method': 'GET',
+                    'headers': headers,
+                }))
+
+
+            Promise.all(promises).then(values=>{
+                resolve(values)
+            })
+            .catch((error)=>{
+                reject(error)
+            })
+        })
+    }
 }
 
 
 ipcMain.on('polar-activate',()=>{
-    console.log(0)
-
     var trans = Object.create(Transaction)
-    console.log(1)
+    const db = require('./database')(mainWindow)
 
-    trans.init().then(()=>{
-        console.log(2)
+    // trans.init().then(()=>{
+    trans.transactionId = 168341665
+        trans.listExercises().then((urls)=>{
+            for (url of urls){
+                trans.downloadExercise(url).then((values)=>{
+                    console.log(values[3])
+                    parse.polar(values).then(([track,trackPoints])=>{
+                        db.commit(track,trackPoints).then(()=>{
 
-        trans.downloadExercises().then((values)=>{
-            console.log(3)
-
-            parse.polar(values).then((track,trackPoints)=>{
-                console.log(4)
-
-                db.commit(track,trackPoints).then(()=>{
-                    console.log(5)
-
-                    // trans.commit().then(()=>{
-                    //
-                    //     console.log("Done")
-                    // })
-                })
-            })
-        })
-    })
+                            // trans.commit().then(()=>{
+                            //
+                            //     console.log("Done")
+                            // })
+                        })
+                    }).catch(err=>{console.log(err)})
+                }).catch(err=>{console.log(err)})
+            }
+        }).catch(err=>{console.log(err)})
+    // }).catch(err=>{console.log(err)})
 })

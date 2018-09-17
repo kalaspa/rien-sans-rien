@@ -12,6 +12,10 @@ const googleMaps = require('@google/maps').createClient({
     rate: {limit: 50},
 });
 
+var parseNullString = function(inputString){
+    return "null".toUpperCase() == inputString.toUpperCase() ? null : inputString
+}
+
 var ParseString = require('xml2js').parseString;
 
 exports.feedCSV = function(track, trackPoints, csvFile){
@@ -67,7 +71,7 @@ exports.feedCSV = function(track, trackPoints, csvFile){
     })
 }
 
-exports.readGPX = function(track, trackPoints, gpxData){
+readGPX = function(track, trackPoints, gpxData){
 
     return new Promise((resolve, reject)=>{
         track.gpsOn = true
@@ -122,7 +126,7 @@ var readSummary = function (track, summary){
     track.totalDistance = summary.distance / 1000
     track.averageSpeed = (track.totalDistance / (track.duration / 3600)).toFixed(2)
     track.averageHeartRate =summary['heart-rate']['average']
-    track.gpsOn = false
+    track.gpsOn = summary['has-route']
     track.calories = summary['calories']
 }
 
@@ -146,24 +150,25 @@ exports.polar = function(values){
     const track = {}
     const trackPoints = []
 
-    data, summary, samples = values[0], values[1], values[2]
+    var data, summary, samples
+    [data, summary, samples] = values
     readSummary(track, summary)
     readSamples(track, trackPoints, samples)
 
     return new Promise((resolve, reject)=>{
-        if (summary['has-route']){
+        if (track.gpsOn){
             ParseString(data.toString(),(err,data)=>{
                 gpxData = data.gpx
 
-                exports.readGPX(track, trackPoints, gpxData).then(()=>{
-                        resolve(track, trackPoints)
+                readGPX(track, trackPoints, gpxData).then(()=>{
+                        resolve([track, trackPoints])
                     }).catch((err)=>{
                         reject(err)
                     })
             })
         }
         else {
-            resolve(track,trackPoints)
+            resolve([track,trackPoints])
         }
     })
 }

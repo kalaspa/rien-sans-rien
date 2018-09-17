@@ -10,7 +10,7 @@ exports.produceHtml = function(track){
     return `
     <div class="demo-wrapper">
       <button class="demo-toggle-button" data-id="${track.id}"> ${track.location || track.sport}
-        <div class="demo-meta"><img height='16' src=${icons[track.sport]}/><span class="demo-meta-divider">|</span> ${pad2(date.getDate())}/${pad2(1+date.getMonth())}/${date.getFullYear()} <span class="demo-meta-divider">|</span> ${track.totalDistance} km</div>
+        <div class="demo-meta"><img height='16' src=${icons[track.sport]||icons.default} /><span class="demo-meta-divider">|</span> ${pad2(date.getDate())}/${pad2(1+date.getMonth())}/${date.getFullYear()} <span class="demo-meta-divider">|</span> ${track.totalDistance} km</div>
       </button>
       <div class="demo-box">
         <table>
