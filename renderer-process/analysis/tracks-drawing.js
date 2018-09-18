@@ -1,11 +1,19 @@
 const d3 = require('d3')
 const {screen} = require('electron').remote
 
-function getMin(data,key) {
-    return data.reduce((min, p) => p[key] < min ? p[key] : min, data[0][key]);
-}
 function getMax(data,key) {
     return data.reduce((max, p) => p[key] > max ? p[key] : max, data[0][key]);
+}
+
+function getValues(trackPoints,key,number){
+    var max = getMax(trackPoints,key)
+    var step = max / number
+    var values = []
+    for (var value = 0; value < max; value+=step){
+        values.push(value)
+    }
+    console.log(values.length)
+    return values
 }
 
 let started = {}
@@ -28,6 +36,31 @@ exports.parseTime = function(trackPoints){
     }
 }
 
+var axis = function(y, trackPoints, key){
+
+    console.log(y,trackPoints,key)
+    return function(selection){
+        if (key == "altitude"){
+            selection.call(d3.axisLeft(y)
+                .tickValues(getValues(trackPoints,key,10)))
+        }
+        else if (key == "hr"){
+            selection.call(d3.axisRight(y)
+                .tickValues(getValues(trackPoints,key,10)))
+        }
+        else if (key == "speed") {
+            selection.attr("transform","translate( " + width  + ", 0 )")
+                .call(d3.axisLeft(y)
+                .tickValues(getValues(trackPoints,key,10)))
+        }
+        else {
+            selection.attr("transform","translate( " + width  + ", 0 )")
+                .call(d3.axisRight(y)
+                .tickValues(getValues(trackPoints,key,10)))
+        }
+    }
+}
+
 var init = function(trackPoints,key){
 
     var x = d3.scaleTime()
@@ -46,20 +79,39 @@ var init = function(trackPoints,key){
     svg.datum(trackPoints)
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
-        .append("g")
+
+    g = svg.append('g')
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    svg.append("g")
+    g.append("g")
         .attr("class", "axis axis--x")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x)
-            .tickFormat(d3.timeFormat("%H:%M:%S")))
+            .tickFormat(d3.timeFormat("%H:%M:%S"))
+        )
 
-    svg.append("g")
+    g.append("g")
+        .attr("class", "grid grid--x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x)
+            .tickSize(-height)
+            .tickFormat("")
+        )
+
+    g.append("g")
         .attr("class", "axis axis--y")
-        .call(d3.axisLeft(y));
+        .attr("id","tick-" + key)
+        .call(axis(y,trackPoints,key))
 
-    svg.append("path")
+    g.append("g")
+        .attr("class", "grid grid--y")
+        .call(d3.axisLeft(y)
+            .tickSize(-width)
+            .tickFormat("")
+            .tickValues(getValues(trackPoints,key,10))
+        )
+
+    g.append("path")
         .attr("transform","translate(0, -1000)")
         .transition()
         .attr("transform","translate(0, 0)")
@@ -83,7 +135,7 @@ var update = function(trackPoints,key){
 
     var y = d3.scaleLinear()
         .range([height, 0])
-        .domain([getMin(trackPoints,key),getMax(trackPoints,key)]);
+        .domain([0,getMax(trackPoints,key)]);
 
     var line = d3.line()
         .defined(function(d) { return d; })
@@ -91,8 +143,20 @@ var update = function(trackPoints,key){
         .y(function(d) { return y(d[key])})
 
     d3.selectAll(".axis--x")
+        .transition(t)
         .call(d3.axisBottom(x)
             .tickFormat(d3.timeFormat("%H:%M:%S")))
+
+    d3.selectAll("#tick-" + key)
+        .transition(t)
+        .call(axis(y,trackPoints,key))
+
+    d3.selectAll(".grid--x")
+        .transition(t)
+        .call(d3.axisBottom(x)
+            .tickSize(-height)
+            .tickFormat("")
+        )
 
     path.transition(t)
         .attr('d', line)
@@ -130,7 +194,12 @@ exports.hide = function(key){
 
     path.exit()
         .transition()
-        .attr("transform","translate(0, -1000)")
+        .attr("transform","translate("+margin.left+", -1000)")
+        .remove()
+
+    var yAxis = d3.selectAll("#tick-"+key).data([])
+
+    yAxis.exit()
         .remove()
 
     delete started[key]
@@ -139,7 +208,7 @@ exports.hide = function(key){
 exports.clear = function(){
     svg = d3.select("svg")
         .transition()
-        .attr("transform","translate(0, -1000)")
+        .attr("transform","translate("+margin.left+", -1000)")
         .duration(1000)
         .remove()
     started = {}

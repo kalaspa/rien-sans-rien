@@ -1,3 +1,10 @@
+:root{
+    --altitude-color: #7c4598;
+    --hr-color: #9f2b32;
+    --speed-color: #269687;
+    --distances-color: #3873d7;
+}
+
 nav {
     margin: 0;
     padding: 0;
@@ -35,12 +42,6 @@ tr:hover {
     text-align:center;
 }
 
-.grid line {
-  stroke: lightgrey;
-  stroke-opacity: 0.7;
-  shape-rendering: crispEdges;
-}
-
 .btn:hover {
 	transform:scale(1.03);
 }
@@ -71,40 +72,72 @@ tr:hover {
     stroke-width: 1.5px;
 }
 
+.grid line {
+  stroke: lightgrey;
+  stroke-opacity: 0.7;
+  shape-rendering: crispEdges;
+}
+
 .legend {
     width:60px;
     border-bottom-width: thick;
     border-bottom-style: solid;
 }
 
+.grid .tick {
+    stroke: lightgrey;
+    opacity: 0.7;
+}
+.grid path {
+      stroke-width: 0;
+}
+
+/* ---------------------- Graph colors ------------*/
+
+#tick-speed text{
+    fill: var(--speed-color);
+}
+
 #data-speed {
-    stroke: #269687;
+    stroke: var(--speed-color);
 }
 
 #legend-speed {
-    background-color:#269687;
+    background-color:var(--speed-color);
+}
+
+#tick-altitude text{
+    fill: var(--altitude-color);
 }
 
 #data-altitude {
-    stroke: #7c4598;
+    stroke: var(--altitude-color);
 }
 
 #legend-altitude {
-    background-color:#7c4598;
+    background-color:var(--altitude-color);
+}
+
+#tick-hr text{
+    fill: var(--hr-color);
 }
 
 #data-hr {
-    stroke: #9f2b32;
+    stroke: var(--hr-color);
 }
 
 #legend-hr {
-    background-color:#9f2b32;
+    background-color: var(--hr-color);
+}
+
+#tick-distances text{
+    fill: var(--distances-color);
 }
 
 #data-distances {
-    stroke: #3873d7;
+    stroke: var(--distances-color);
 }
 
 #legend-distances {
-    background-color:#3873d7;
+    background-color:var(--distances-color);
 }
