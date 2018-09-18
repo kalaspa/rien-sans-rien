@@ -7,6 +7,12 @@ const {ipcMain} = require("electron")
 const Promise = require('promise')
 const parse = require('./parser')
 
+let mainWindow
+
+module.exports = function(win){
+    mainWindow = win
+}
+
 var sampleCodes = {
     0 : 'hr',
     1 : 'speed',
@@ -14,11 +20,6 @@ var sampleCodes = {
     3 : 'altitude',
     8 : 'pace',
     10 : 'distances'
-}
-
-let mainWindow
-module.exports = function(win){
-    mainWindow = win
 }
 
 var polar_urls = {
@@ -65,22 +66,24 @@ var auth = function(){
 
     const polarOAuth = electronOauth2(oAuthConfig, windowParams);
 
-    polarOAuth.getAccessToken({})
-        .then(token => {
-            stash.set('user-token',token)
-        }, err => {
-            console.log('Error while getting token', err);
-        });
-}
+    return new Promise((resolve,reject)=>{
+        polarOAuth.getAccessToken({})
+            .then(token => {
+                stash.set('user-token',token)
+                const headers = buildHeaders("USER")
+                // TODO: Give sensible member-id
+                const body = '<?xml version="1.0" encoding="utf-8" ?><register><member-id>user1</member-id> </register>'
 
-var register = function(member_id){
-    const headers = buildHeaders("USER")
-    const body = '<?xml version="1.0" encoding="utf-8" ?><register><member-id>'+member_id+'</member-id> </register>'
+                fetch(polar_urls.user,{'method': 'POST','headers': headers,'body': body}).then(()=>{
+                    resolve()
+                }).catch((err)=>{
+                    reject(err)
+                })
 
-    send(polar_urls.user, 'POST', headers, body)
-        .then(function(body) {
-            console.log(body);
-        });
+            }, err => {
+                reject(err)
+            });
+    })
 }
 
 var getGPX = function(exoURI){
@@ -120,6 +123,7 @@ var getSamples = function(exoURI){
                     resolve(samples)
                 })
             })
+            .catch(err=>{reject(err)})
     })
 }
 
@@ -131,7 +135,7 @@ var Transaction = {
 
         return new Promise((resolve,reject)=>{
             send(polar_urls.notifications, 'GET', headers_client).then((body)=>{
-                var exercise = true
+                var exercise
                 for (item of body['available-user-data']){
                     if (item['data-type'] == 'EXERCISE'){exercise = true}
                 }
@@ -143,7 +147,7 @@ var Transaction = {
                     })
                 }
                 else {
-                    reject()
+                    reject("No new exercise")
                 }
             }).catch((error)=>{
                 reject(error)
@@ -199,21 +203,21 @@ ipcMain.on('polar-activate',()=>{
     var trans = Object.create(Transaction)
     const db = require('./database')(mainWindow)
 
-    trans.init().then(()=>{
-        trans.listExercises().then((urls)=>{
-            for (url of urls){
-                trans.downloadExercise(url).then((values)=>{
-                    parse.polar(values).then(([track,trackPoints])=>{
-                        db.commit(track,trackPoints).then(()=>{
-
-                            // trans.commit().then(()=>{
-                            //
-                            //     console.log("Done")
-                            // })
-                        })
+    auth().then(()=>{
+        trans.init().then(()=>{
+            trans.listExercises().then((urls)=>{
+                for (url of urls){
+                    trans.downloadExercise(url).then((values)=>{
+                        parse.polar(values).then(([track,trackPoints])=>{
+                            db.commit(track,trackPoints).then(()=>{
+                                trans.commit().then(()=>{
+                                    console.log("Done")
+                                })
+                            })
+                        }).catch(err=>{console.log(err)})
                     }).catch(err=>{console.log(err)})
-                }).catch(err=>{console.log(err)})
-            }
+                }
+            }).catch(err=>{console.log(err)})
         }).catch(err=>{console.log(err)})
-    }).catch(err=>{console.log(err)})
+    }).catch((err)=>{console.log(err)})
 })
