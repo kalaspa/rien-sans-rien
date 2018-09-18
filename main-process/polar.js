@@ -184,13 +184,6 @@ var Transaction = {
             // Samples
             promises.push(getSamples(url))
 
-            promises.push(fetch(url+'/fit',
-                {
-                    'method': 'GET',
-                    'headers': headers,
-                }))
-
-
             Promise.all(promises).then(values=>{
                 resolve(values)
             })
@@ -206,12 +199,10 @@ ipcMain.on('polar-activate',()=>{
     var trans = Object.create(Transaction)
     const db = require('./database')(mainWindow)
 
-    // trans.init().then(()=>{
-    trans.transactionId = 168341665
+    trans.init().then(()=>{
         trans.listExercises().then((urls)=>{
             for (url of urls){
                 trans.downloadExercise(url).then((values)=>{
-                    console.log(values[3])
                     parse.polar(values).then(([track,trackPoints])=>{
                         db.commit(track,trackPoints).then(()=>{
 
@@ -224,5 +215,5 @@ ipcMain.on('polar-activate',()=>{
                 }).catch(err=>{console.log(err)})
             }
         }).catch(err=>{console.log(err)})
-    // }).catch(err=>{console.log(err)})
+    }).catch(err=>{console.log(err)})
 })

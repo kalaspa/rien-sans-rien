@@ -24,49 +24,60 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 });
 
 const Track = sequelize.define('track', {
-    name : Sequelize.STRING ,
-    sport : Sequelize.STRING ,
-    date : {type: Sequelize.DATE, unique: true},
-    duration : Sequelize.FLOAT ,
-    totalDistance : {type: Sequelize.FLOAT , allowNull: true},
-    averageHeartRate : {type: Sequelize.FLOAT, allowNull:true} ,
-    averageSpeed : {type: Sequelize.FLOAT, allowNull:true} ,
-    maxSpeed : {type: Sequelize.FLOAT, allowNull:true} ,
-    averagePace : {type: Sequelize.FLOAT, allowNull:true} ,
-    maxPace : {type: Sequelize.FLOAT, allowNull:true} ,
-    calories : Sequelize.FLOAT ,
-    fatPercentageOfCalories : Sequelize.FLOAT ,
-    averageCadence : {type: Sequelize.FLOAT, allowNull:true} ,
-    averageStrideLength : {type: Sequelize.FLOAT, allowNull:true} ,
-    runningIndex : {type: Sequelize.FLOAT, allowNull:true} ,
-    trainingLoad : Sequelize.STRING ,
-    ascent : {type: Sequelize.FLOAT, allowNull: true} ,
-    descent : {type: Sequelize.FLOAT, allowNull: true} ,
-    notes : Sequelize.TEXT ,
-    height : Sequelize.FLOAT ,
-    weight : Sequelize.FLOAT ,
-    hrMax : Sequelize.FLOAT ,
-    hrSit : Sequelize.FLOAT ,
-    vo2Max : Sequelize.FLOAT,
-    location : {type: Sequelize.STRING, allowNull:true},
-    gpsOn : {type: Sequelize.BOOLEAN, default: false},
-});
+        name : Sequelize.STRING ,
+        sport : Sequelize.STRING ,
+        date : {type: Sequelize.DATE, unique: true},
+        duration : Sequelize.FLOAT ,
+        totalDistance : {type: Sequelize.FLOAT , allowNull: true},
+        averageHeartRate : {type: Sequelize.FLOAT, allowNull:true} ,
+        averageSpeed : {type: Sequelize.FLOAT, allowNull:true} ,
+        maxSpeed : {type: Sequelize.FLOAT, allowNull:true} ,
+        averagePace : {type: Sequelize.FLOAT, allowNull:true} ,
+        maxPace : {type: Sequelize.FLOAT, allowNull:true} ,
+        calories : Sequelize.FLOAT ,
+        fatPercentageOfCalories : Sequelize.FLOAT ,
+        averageCadence : {type: Sequelize.FLOAT, allowNull:true} ,
+        averageStrideLength : {type: Sequelize.FLOAT, allowNull:true} ,
+        runningIndex : {type: Sequelize.FLOAT, allowNull:true} ,
+        trainingLoad : Sequelize.STRING ,
+        ascent : {type: Sequelize.FLOAT, allowNull: true} ,
+        descent : {type: Sequelize.FLOAT, allowNull: true} ,
+        notes : Sequelize.TEXT ,
+        height : Sequelize.FLOAT ,
+        weight : Sequelize.FLOAT ,
+        hrMax : Sequelize.FLOAT ,
+        hrSit : Sequelize.FLOAT ,
+        vo2Max : Sequelize.FLOAT,
+        location : {type: Sequelize.STRING, allowNull:true},
+        gpsOn : {type: Sequelize.BOOLEAN, default: false},
+    }
+);
 
 const TrackPoint = sequelize.define('trackPoint', {
-    time : Sequelize.FLOAT ,
-    hr : {type: Sequelize.FLOAT, allowNull:true} ,
-    speed : {type: Sequelize.FLOAT, allowNull:true} ,
-    pace : {type: Sequelize.FLOAT, allowNull:true} ,
-    cadence : {type: Sequelize.FLOAT, allowNull:true} ,
-    altitude : {type: Sequelize.FLOAT, allowNull:true} ,
-    strideLength : {type: Sequelize.FLOAT, allowNull:true} ,
-    distances : {type: Sequelize.FLOAT, allowNull:true} ,
-    lattitude : {type: Sequelize.FLOAT, allowNull:true} ,
-    longitude : {type: Sequelize.FLOAT, allowNull:true}
-})
+        time : Sequelize.FLOAT ,
+        hr : {type: Sequelize.FLOAT, allowNull:true} ,
+        speed : {type: Sequelize.FLOAT, allowNull:true} ,
+        pace : {type: Sequelize.FLOAT, allowNull:true} ,
+        cadence : {type: Sequelize.FLOAT, allowNull:true} ,
+        altitude : {type: Sequelize.FLOAT, allowNull:true} ,
+        strideLength : {type: Sequelize.FLOAT, allowNull:true} ,
+        distances : {type: Sequelize.FLOAT, allowNull:true} ,
+        lattitude : {type: Sequelize.FLOAT, allowNull:true} ,
+        longitude : {type: Sequelize.FLOAT, allowNull:true},
+        trackID: Sequelize.INTEGER
+    },
+    {
+        indexes: [{
+            name: "track_id_index",
+            method: "BTREE",
+            fields: ["trackId"]
+        }]
+    }
 
-TrackPoint.belongsTo(Track)
-Track.hasMany(TrackPoint)
+)
+
+TrackPoint.belongsTo(Track,{foreignKey:'trackId'})
+Track.hasMany(TrackPoint,{foreignKey:'trackId'})
 
 sequelize.authenticate()
     .then(() => {

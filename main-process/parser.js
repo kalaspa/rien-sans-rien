@@ -5,6 +5,7 @@ const d3 = require('d3')
 const Promise = require('promise')
 const fs = require('fs');
 
+const threshold = 5
 
 const googleMaps = require('@google/maps').createClient({
     key : googleApiKey,
@@ -14,6 +15,24 @@ const googleMaps = require('@google/maps').createClient({
 
 var parseNullString = function(inputString){
     return "null".toUpperCase() == inputString.toUpperCase() ? null : inputString
+}
+
+var ascentDescent = function(altitudeSample){
+    var ascent = 0
+    var descent = 0
+
+    var previousAlt = altitudeSample[0]
+
+    for (alt of altitudeSample){
+        var diff = alt - previousAlt
+        if (Math.abs(diff) > threshold && alt!=0){
+            if (diff > 0){ascent += diff}
+            else { descent += -diff}
+            previousAlt = alt
+        }
+    }
+
+    return [ascent,descent]
 }
 
 var ParseString = require('xml2js').parseString;
@@ -135,6 +154,12 @@ var readSamples = function(track, trackPoints, samples){
 
     if (samples.hasOwnProperty('speed')){
         track.maxSpeed = samples.speed.reduce((a,b)=>{return Math.max(a,b)})
+    }
+
+    if (samples.hasOwnProperty('altitude')){
+        var [ascent, descent] = ascentDescent(samples.altitude)
+        track.ascent = (ascent).toFixed(0)
+        track.descent = (descent).toFixed(0)
     }
 
     for (var i = 0; i < track.duration; i++){

@@ -98,7 +98,17 @@ ipcRenderer.on('track-list-retrieved',(event,tracks)=>{
     addDemoListeners()
 })
 
+function makeFilterFunc(howMany) {
+    return function filterFunc(elt, idx, arr) {
+        return idx === 0         ||       // first element
+        idx === arr.length-1     ||       // last element
+        arr.length < howMany     ||
+        idx % Math.floor(arr.length / howMany) === 0;
+    };
+}
+
 ipcRenderer.on('track-points-retrieved-tracks',(event,trackPoints)=>{
-    currentTrackPoints = trackPoints
+    filterFunc = makeFilterFunc(800);
+    currentTrackPoints = trackPoints.filter(filterFunc)
     setGraphs()
 })
