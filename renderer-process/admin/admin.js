@@ -25,7 +25,7 @@ ipcRenderer.on('error-delete',(event,err)=>{
 
 
 ipcRenderer.on('track-list-retrieved',(event,tracks)=>{
-    line = produceHeader()
+    var line = produceHeader()
     for (track of tracks){
         line = line + produceHtml(track)
     }
@@ -38,10 +38,4 @@ ipcRenderer.on('track-list-retrieved',(event,tracks)=>{
         })
     })
 
-})
-
-
-// ipcRenderer.send('polar-oauth')
-
-ipcRenderer.on('polar-oauth-reply',(event,token)=>{
 })
