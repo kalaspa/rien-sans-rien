@@ -13,7 +13,10 @@ module.exports = function(win){
     mainWindow = win
 }
 
-var sampleCodes = {
+/* --------------------- Useful constants ---------------------*/
+
+
+const sampleCodes = {
     0 : 'hr',
     1 : 'speed',
     2 : 'cadence',
@@ -22,12 +25,15 @@ var sampleCodes = {
     10 : 'distances'
 }
 
-var polar_urls = {
+const polar_urls = {
     user: 'https://www.polaraccesslink.com/v3/users',
     notifications: "https://www.polaraccesslink.com/v3/notifications",
     transaction: (user_id) => {return ('https://www.polaraccesslink.com/v3/users/'+user_id+'/exercise-transactions')},
     transactionId: (user_id, trans_id) =>{return ('https://www.polaraccesslink.com/v3/users/'+user_id+'/exercise-transactions/'+trans_id)}
 }
+
+/* --------------------- Intermediate functions ---------------------*/
+
 
 var buildHeaders = function(requester){
     const headers = {'Accept':'application/json'}
@@ -86,6 +92,9 @@ var auth = function(){
     })
 }
 
+/* --------------------- Specific requests ---------------------*/
+
+
 var getGPX = function(exoURI){
     const user = stash.get('user-token')
     const headers = buildHeaders('USER')
@@ -126,6 +135,9 @@ var getSamples = function(exoURI){
             .catch(err=>{reject(err)})
     })
 }
+
+/* --------------------- Transaction object definition ---------------------*/
+
 
 var Transaction = {
     init : function(){
@@ -197,6 +209,8 @@ var Transaction = {
         })
     }
 }
+
+/* --------------------- ipcMain listener ---------------------*/
 
 
 ipcMain.on('polar-activate',()=>{

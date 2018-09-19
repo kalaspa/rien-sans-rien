@@ -6,6 +6,9 @@ module.exports = function(win){
     mainWindow = win
 }
 
+/* --------------------- ipcMain listeners ---------------------*/
+
+
 ipcMain.on('open-file-dialog', (event , extension) => {
     const options = {
         title: 'Load the .' + extension + ' file',

@@ -5,6 +5,8 @@ const d3 = require('d3')
 const Promise = require('promise')
 const fs = require('fs');
 
+/* --------------------- Constants/initialization ---------------------*/
+
 const threshold = 5
 
 const googleMaps = require('@google/maps').createClient({
@@ -12,6 +14,8 @@ const googleMaps = require('@google/maps').createClient({
     Promise: Promise,
     rate: {limit: 50},
 });
+
+/* --------------------- Intermediate functions ---------------------*/
 
 var parseNullString = function(inputString){
     return "null".toUpperCase() == inputString.toUpperCase() ? null : inputString
@@ -35,7 +39,68 @@ var ascentDescent = function(altitudeSample){
     return [ascent,descent]
 }
 
+var readSummary = function (track, summary){
+
+    track.sport = summary['detailed-sport-info']
+    track.date = new Date(summary['start-time'])
+    track.duration = Math.ceil(moment.duration(summary['duration']).asSeconds())
+    track.totalDistance = summary.distance / 1000
+    track.averageSpeed = (track.totalDistance / (track.duration / 3600)).toFixed(2)
+    track.averageHeartRate =summary['heart-rate']['average']
+    track.gpsOn = summary['has-route']
+    track.calories = summary['calories']
+}
+
+var readSamples = function(track, trackPoints, samples){
+    var trackPoint
+
+    if (samples.hasOwnProperty('speed')){
+        track.maxSpeed = samples.speed.reduce((a,b)=>{return Math.max(a,b)})
+    }
+
+    if (samples.hasOwnProperty('altitude')){
+        var [ascent, descent] = ascentDescent(samples.altitude)
+        track.ascent = (ascent).toFixed(0)
+        track.descent = (descent).toFixed(0)
+    }
+
+    for (var i = 0; i < track.duration; i++){
+        trackPoint = {time : i}
+        for (key in samples){
+            trackPoint[key] = samples[key][i]
+        }
+        trackPoints.push(trackPoint)
+    }
+}
+
+var readGPX = function(track, trackPoints, gpxData){
+
+    return new Promise((resolve, reject)=>{
+        track.gpsOn = true
+
+        for (var i = 0; i < gpxData.trk[0].trkseg[0].trkpt.length && trackPoints[i]; i++){
+            trackPoints[i].lattitude = parseFloat(gpxData.trk[0].trkseg[0].trkpt[i]['$'].lat)
+            trackPoints[i].longitude = parseFloat(gpxData.trk[0].trkseg[0].trkpt[i]['$'].lon)
+        }
+
+        var lat = parseFloat(gpxData.trk[0].trkseg[0].trkpt[0]['$'].lat)
+        var lon = parseFloat(gpxData.trk[0].trkseg[0].trkpt[0]['$'].lon)
+
+        googleMaps.reverseGeocode({latlng: [lat, lon],result_type: "locality|country"}).asPromise()
+            .then((response)=>{
+                track.location = response.json.results[0]['formatted_address']
+                resolve()
+            })
+            .catch((err)=>{
+                reject(err.errors[0].message)
+            })
+    })
+}
+
 var ParseString = require('xml2js').parseString;
+
+/* --------------------- Exported functions ---------------------*/
+
 
 exports.feedCSV = function(track, trackPoints, csvFile){
     var parseTime = d3.timeParse("%d/%m/%Y,%H:%M:%S")
@@ -90,30 +155,6 @@ exports.feedCSV = function(track, trackPoints, csvFile){
     })
 }
 
-readGPX = function(track, trackPoints, gpxData){
-
-    return new Promise((resolve, reject)=>{
-        track.gpsOn = true
-
-        for (var i = 0; i < gpxData.trk[0].trkseg[0].trkpt.length && trackPoints[i]; i++){
-            trackPoints[i].lattitude = parseFloat(gpxData.trk[0].trkseg[0].trkpt[i]['$'].lat)
-            trackPoints[i].longitude = parseFloat(gpxData.trk[0].trkseg[0].trkpt[i]['$'].lon)
-        }
-
-        var lat = parseFloat(gpxData.trk[0].trkseg[0].trkpt[0]['$'].lat)
-        var lon = parseFloat(gpxData.trk[0].trkseg[0].trkpt[0]['$'].lon)
-
-        googleMaps.reverseGeocode({latlng: [lat, lon],result_type: "locality|country"}).asPromise()
-            .then((response)=>{
-                track.location = response.json.results[0]['formatted_address']
-                resolve()
-            })
-            .catch((err)=>{
-                reject(err.errors[0].message)
-            })
-    })
-}
-
 exports.feedGPX = function(track, trackPoints, gpxFile){
 
     return new Promise((resolve, reject)=>{
@@ -135,40 +176,6 @@ exports.feedGPX = function(track, trackPoints, gpxFile){
             }
         })
     })
-}
-
-var readSummary = function (track, summary){
-
-    track.sport = summary['detailed-sport-info']
-    track.date = new Date(summary['start-time'])
-    track.duration = Math.ceil(moment.duration(summary['duration']).asSeconds())
-    track.totalDistance = summary.distance / 1000
-    track.averageSpeed = (track.totalDistance / (track.duration / 3600)).toFixed(2)
-    track.averageHeartRate =summary['heart-rate']['average']
-    track.gpsOn = summary['has-route']
-    track.calories = summary['calories']
-}
-
-var readSamples = function(track, trackPoints, samples){
-    var trackPoint
-
-    if (samples.hasOwnProperty('speed')){
-        track.maxSpeed = samples.speed.reduce((a,b)=>{return Math.max(a,b)})
-    }
-
-    if (samples.hasOwnProperty('altitude')){
-        var [ascent, descent] = ascentDescent(samples.altitude)
-        track.ascent = (ascent).toFixed(0)
-        track.descent = (descent).toFixed(0)
-    }
-
-    for (var i = 0; i < track.duration; i++){
-        trackPoint = {time : i}
-        for (key in samples){
-            trackPoint[key] = samples[key][i]
-        }
-        trackPoints.push(trackPoint)
-    }
 }
 
 exports.polar = function(values){

@@ -16,6 +16,9 @@ module.exports = function(win){
     return {commit: commit}
 }
 
+/* --------------------- Sequelize definition ---------------------*/
+
+
 const sequelize = new Sequelize('database', 'username', 'password', {
   dialect: 'sqlite',
   operatorsAliases: false,
@@ -95,6 +98,9 @@ sequelize.sync()
         console.log("Couldn't synchronize the database")
     })
 
+/* --------------------- Intermediate functions ---------------------*/
+
+
 var commit = function(track, trackPoints){
     return new Promise((resolve,reject)=>{
         Track.create(track)
@@ -145,6 +151,8 @@ var addTrack = function(gpxFile, csvFile){
         })
     })
 }
+
+/* --------------------- ipcMain listeners ---------------------*/
 
 ipcMain.on('save-in-db',(event, gpxFile, csvFile)=>{
     if (csvFile){
