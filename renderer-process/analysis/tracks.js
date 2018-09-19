@@ -51,26 +51,26 @@ var addDemoListeners = function(){
 
     // Listen for demo button clicks
     Array.prototype.forEach.call(demoBtns, (btn) => {
-      btn.addEventListener('click', (event) => {
-        const parent = event.target.parentElement
-        var wasOpen = parent.classList.contains('is-open')
+        btn.addEventListener('click', (event) => {
+            const parent = btn.parentElement
+            var wasOpen = parent.classList.contains('is-open')
 
-        Array.prototype.forEach.call(document.querySelectorAll(".demo-wrapper"),(wrp)=>{
-            wrp.classList.remove('is-open')
+            Array.prototype.forEach.call(document.querySelectorAll(".demo-wrapper.is-open"),(wrp)=>{
+                wrp.classList.remove('is-open')
+            })
+
+            trackId = btn.dataset.id
+
+            if (!wasOpen){
+                parent.classList.add('is-open')
+                ipcRenderer.send('get-track-points',"tracks",trackId)
+            }
+            else {
+                trackId = false
+                currentTrackPoints = false
+                td.clear()
+            }
         })
-
-        trackId = event.target.dataset.id
-
-        if (!wasOpen){
-            parent.classList.add('is-open')
-            ipcRenderer.send('get-track-points',"tracks",trackId)
-        }
-        else {
-            trackId = false
-            currentTrackPoints = false
-            td.clear()
-        }
-      })
     })
 }
 

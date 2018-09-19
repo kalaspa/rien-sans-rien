@@ -6,12 +6,18 @@ const {googleApiKey} = require('./../../config')
 let map
 var boundList = {}
 
+const reloadBtn = document.getElementById("reload-button-map")
+
+reloadBtn.addEventListener('click', (event) => {
+    console.log("test")
+    ipcRenderer.send('get-track-list')
+})
+
 var updateBounds = function(){
     var bounds = new google.maps.LatLngBounds();
 
     Array.prototype.forEach.call(document.querySelectorAll(".map-switch"),(sw)=>{
         var trackId = sw.dataset.id
-        console.log(bounds)
         if (sw.checked){
             bounds.union(boundList[trackId])
         }
@@ -48,6 +54,7 @@ ipcRenderer.on('track-list-retrieved',(event,tracks)=>{
 
         sw.addEventListener('click',(event)=>{
             var trackId = sw.dataset.id
+
             if (sw.checked){
                 ipcRenderer.send('get-track-points','maps',trackId)
             }

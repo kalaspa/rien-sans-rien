@@ -12,7 +12,6 @@ function getValues(trackPoints,key,number){
     for (var value = 0; value < max; value+=step){
         values.push(value)
     }
-    console.log(values.length)
     return values
 }
 
@@ -38,7 +37,6 @@ exports.parseTime = function(trackPoints){
 
 var axis = function(y, trackPoints, key){
 
-    console.log(y,trackPoints,key)
     return function(selection){
         if (key == "altitude"){
             selection.call(d3.axisLeft(y)
