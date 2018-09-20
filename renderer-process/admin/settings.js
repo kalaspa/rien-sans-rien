@@ -6,16 +6,19 @@ const {ipcRenderer} = require('electron')
 
 const saveBtn = document.getElementById("update-name")
 
-let trackId = false
+let currentTrack = false
 
-ipcRenderer.on('settings-track-id',(event,id)=>{
-    trackId = id
+ipcRenderer.on('settings-track-id',(event,track)=>{
+    currentTrack = track
+    document.getElementById('new-name').value = track.location
+    document.getElementById('new-sport').value = track.sport
 })
 
 saveBtn.addEventListener('click',(event) => {
-    var new_name = document.getElementById('new-name').value
+    currentTrack.location = document.getElementById('new-name').value
+    currentTrack.sport = document.getElementById('new-sport').value
 
-    ipcRenderer.send('update-name-in-db', trackId, new_name)
+    ipcRenderer.send('update-name-in-db', currentTrack)
 
     document.getElementById('new-name').value = ""
 })

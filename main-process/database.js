@@ -219,19 +219,17 @@ ipcMain.on('get-track-points',(event,process,trackId)=>{
     }
 })
 
-ipcMain.on('update-name-in-db',(event,trackId,name)=>{
-    if (trackId && name){
-        Track.update(
-            { location: name }, /* set attributes' value */
-            { where: { id: trackId }}
-        )
-            .then(()=>{
-                event.sender.send('success-update')
-            })
-            .catch((err)=>{
-                event.sender.send('error-update',err)
-            })
-    }
+ipcMain.on('update-name-in-db',(event,track)=>{
+    Track.update(
+        track, /* set attributes' value */
+        { where: { id: track.id }}
+    )
+        .then(()=>{
+            event.sender.send('success-update')
+        })
+        .catch((err)=>{
+            event.sender.send('error-update',err)
+        })
 })
 
 ipcMain.on('delete-tracks',(event,selected)=>{

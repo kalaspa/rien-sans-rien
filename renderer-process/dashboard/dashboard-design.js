@@ -12,6 +12,8 @@ var giveDuration = function(time){
     return goodTime
 }
 
+exports.giveDuration = giveDuration
+
 exports.produceHtml = function(sport,data){
 
     return `
@@ -20,10 +22,25 @@ exports.produceHtml = function(sport,data){
                 ${sport}
             </td>
             <td>
+                ${data.lastYearNumberOfSessions}
+            </td>
+            <td>
                 ${data.numberOfSessions}
             </td>
             <td>
+                ${giveDuration(data.longestTime)}
+            </td>
+            <td>
+                ${giveDuration(data.lastYearTime)}
+            </td>
+            <td>
                 ${giveDuration(data.time)}
+            </td>
+            <td>
+                ${data.longestDistance}
+            </td>
+            <td>
+                ${(data.lastYearDistance).toFixed(0)}
             </td>
             <td>
                 ${(data.totalDistance).toFixed(0)}
@@ -33,14 +50,16 @@ exports.produceHtml = function(sport,data){
 
 }
 
-
 exports.produceHeader = function(){
-    return `
-        <tr>
-            <th> Sport </th>
-            <th> Number of sessions </th>
-            <th> Time spent </th>
-            <th> Total distance (km) </th>
-        </tr>
-        `
+    return `<tr>
+        <th class='dashboard-header' data-id='0'> Sport </th>
+        <th class='dashboard-header' data-id='1'> Last year number of sessions </th>
+        <th class='dashboard-header' data-id='2'> All time number of sessions </th>
+        <th class='dashboard-header' data-id='3'> Longest session (time) </th>
+        <th class='dashboard-header' data-id='4'> Last year time spent </th>
+        <th class='dashboard-header' data-id='5'> All time time spent </th>
+        <th class='dashboard-header' data-id='6'> Longest session (distance) </th>
+        <th class='dashboard-header' data-id='7'> Last year distance (km) </th>
+        <th class='dashboard-header' data-id='8'> All time distance (km) </th>
+    </tr>`
 }

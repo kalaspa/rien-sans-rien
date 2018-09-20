@@ -34,7 +34,8 @@ ipcRenderer.on('track-list-retrieved',(event,tracks)=>{
     Array.prototype.forEach.call(document.querySelectorAll(".settings-btn"),(settingsBtn)=>{
         settingsBtn.addEventListener('click',(event)=>{
             var trackId = settingsBtn.dataset.id
-            ipcRenderer.send('open-settings-window',trackId)
+            var track = tracks.find(elt=> elt.id==trackId)
+            ipcRenderer.send('open-settings-window',track)
         })
     })
 

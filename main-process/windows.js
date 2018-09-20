@@ -66,11 +66,11 @@ ipcMain.on('open-folder-window',(event)=>{
     win.show()
 })
 
-ipcMain.on('open-settings-window',(event,trackId)=>{
+ipcMain.on('open-settings-window',(event,track)=>{
     let win = new BrowserWindow({
         autoHideMenuBar: true,
         modal: true,
-        height: 250,
+        height: 300,
         width: 700,
         resizable: false,
         parent: mainWindow,
@@ -80,7 +80,7 @@ ipcMain.on('open-settings-window',(event,trackId)=>{
     win.on('close', () => { win = null })
     win.loadFile("windows/settings.html")
     win.once('ready-to-show', (event) => {
-        event.sender.send("settings-track-id", trackId)
+        event.sender.send("settings-track-id", track)
         win.show()
     })
 })
