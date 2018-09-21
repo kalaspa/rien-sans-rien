@@ -1,5 +1,6 @@
 const {ipcRenderer} = require('electron')
 const {produceHtml, produceHeader, giveDuration} = require('./dashboard-design')
+const {drawGraph} = require('./dashboard-drawing')
 
 const polarBtn = document.getElementById("polar-button")
 
@@ -67,6 +68,8 @@ function sortTable(n) {
 }
 
 ipcRenderer.on('track-list-retrieved',(event,tracks)=>{
+    drawGraph(tracks)
+
     var sports = {}
     var today = new Date()
     var totalDistance = 0

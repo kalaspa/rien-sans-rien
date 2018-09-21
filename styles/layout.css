@@ -73,6 +73,12 @@ td th {
     max-height:85vh;
 }
 
+#dashboard-content {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    max-height:85vh;
+}
+
 #admin-content {
     max-height:85vh;
 }

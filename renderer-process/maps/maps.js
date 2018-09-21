@@ -9,7 +9,6 @@ var boundList = {}
 const reloadBtn = document.getElementById("reload-button-map")
 
 reloadBtn.addEventListener('click', (event) => {
-    console.log("test")
     ipcRenderer.send('get-track-list')
 })
 
@@ -29,12 +28,12 @@ GoogleMapsLoader.KEY = googleApiKey;
 
 GoogleMapsLoader.load(function(google) {
     map = new google.maps.Map(document.getElementById('map'), {
-      center: {lat: 45, lng: 5},
-      zoom: 8,
-      fullscreenControl: false,
-      fullscreenControlOptions: false,
-      streetViewControl: false,
-      mapTypeId: 'terrain'
+        center: {lat: 45, lng: 5},
+        zoom: 8,
+        fullscreenControl: false,
+        fullscreenControlOptions: false,
+        streetViewControl: false,
+        mapTypeId: 'terrain'
     });
     map.data.setStyle({
         strokeColor: '#9f2b32'
@@ -46,6 +45,12 @@ ipcRenderer.on('track-list-retrieved',(event,tracks)=>{
     for (track of tracks){
         if (track.gpsOn){
             checks = checks + produceHtml(track)
+        }
+        if (map){
+            var dataFeature = map.data.getFeatureById(track.id)
+            if (dataFeature){
+                map.data.remove(dataFeature)
+            }
         }
     }
     document.getElementById("check-tracks").innerHTML = checks
