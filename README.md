@@ -36,7 +36,7 @@ Future work :
 
 - Add an administration interface to ~~delete training sessions~~ or ~~add missing information, such as locality for sessions without GPS data~~
 - Add export tools
-- ~Use the Polar Flow Accesslink API properly to get future training session~
+- ~~Use the Polar Flow Accesslink API properly to get future training session~~
 - Package the application properly
 
 ## How to recover past sessions :
