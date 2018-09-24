@@ -17,7 +17,6 @@ ipcMain.on('open-file-dialog', (event , extension) => {
         ],
         properties: ['openFile']
     }
-    console.lgo("There")
     dialog.showOpenDialog(options, (files) => {
         if (files) {
         event.sender.send('selected-directory', extension, files)

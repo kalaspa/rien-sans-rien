@@ -1,10 +1,13 @@
 {
-  "name": "track-manager",
+  "name": "rien-sans-rien",
   "version": "0.1.0",
   "description": "Simple app to manage Polar Flow training data",
   "main": "main.js",
   "scripts": {
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "electron-builder install-app-deps",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "test": "mocha"
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
@@ -18,7 +21,8 @@
   "license": "GNU GPLv3",
   "devDependencies": {
     "electron": "^2.0.8",
-    "electron-builder": "^20.28.1"
+    "electron-builder": "^20.28.1",
+    "mocha": "^5.2.0"
   },
   "dependencies": {
     "@google/maps": "^0.5.5",
@@ -30,10 +34,18 @@
     "moment": "^2.22.2",
     "papaparse": "^4.6.0",
     "promise": "^8.0.1",
+    "save-dev": "^2.0.0",
     "sequelize": "^4.38.0",
+    "spectron": "^4.0.0",
     "sqlite": "^2.9.2",
     "sqlite3": "^4.0.2",
     "stash": "0.0.3",
     "xml2js": "^0.4.19"
+  },
+  "build": {
+    "appId": "rienSansRien",
+    "mac": {
+      "category": "your.app.category.type"
+    }
   }
 }

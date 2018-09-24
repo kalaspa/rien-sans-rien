@@ -6,3 +6,4 @@ past-sessions.csv
 past-sessions/
 ressources/track.sqlite
 not-working-past-sessions/
+dist/
